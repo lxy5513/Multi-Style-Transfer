@@ -5,7 +5,7 @@
 ## Copyright (c) 2017
 ##
 ## This source code is licensed under the MIT-style license found in the
-## LICENSE file in the root directory of this source tree 
+## LICENSE file in the root directory of this source tree
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
@@ -41,6 +41,7 @@ def tensor_save_rgbimage(tensor, filename, cuda=False):
         img = tensor.clone().clamp(0, 255).numpy()
     img = img.transpose(1, 2, 0).astype('uint8')
     img = Image.fromarray(img)
+    print('save image as ', filename)
     img.save(filename)
 
 
@@ -110,11 +111,11 @@ class StyleLoader():
         self.style_size = style_size
         self.files = os.listdir(style_folder)
         self.cuda = cuda
-    
+
     def get(self, i):
         idx = i%len(self.files)
         filepath = os.path.join(self.folder, self.files[idx])
-        style = tensor_load_rgbimage(filepath, self.style_size)    
+        style = tensor_load_rgbimage(filepath, self.style_size)
         style = style.unsqueeze(0)
         style = preprocess_batch(style)
         if self.cuda:

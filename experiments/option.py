@@ -28,9 +28,9 @@ class Options():
                                 help="size of training images, default is 256 X 256")
         train_arg.add_argument("--style-size", type=int, default=512,
                                 help="size of style-image, default is the original size of style image")
-        train_arg.add_argument("--cuda", type=int, default=1, 
+        train_arg.add_argument("--cuda", type=int, default=1,
                                 help="set it to 1 for running on GPU, 0 for CPU")
-        train_arg.add_argument("--seed", type=int, default=42, 
+        train_arg.add_argument("--seed", type=int, default=42,
                                 help="random seed for training")
         train_arg.add_argument("--content-weight", type=float, default=1.0,
                                 help="weight for content-loss, default is 1.0")
@@ -56,11 +56,11 @@ class Options():
                                 help="factor for scaling down the content image")
         optim_arg.add_argument("--style-size", type=int, default=512,
                                 help="size of style-image, default is the original size of style image")
-        optim_arg.add_argument("--output-image", type=str, default="output.jpg",
-                                help="path for saving the output image")
+        optim_arg.add_argument("--output-image", type=str, default="output.jpg",help="path for saving the output video name")
+
         optim_arg.add_argument("--vgg-model-dir", type=str, default="models/",
                                 help="directory for vgg, if model is not present in the directory it is downloaded")
-        optim_arg.add_argument("--cuda", type=int, default=1, 
+        optim_arg.add_argument("--cuda", type=int, default=1,
                                 help="set it to 1 for running on GPU, 0 for CPU")
         optim_arg.add_argument("--content-weight", type=float, default=1.0,
                                 help="weight for content-loss, default is 1.0")
@@ -69,7 +69,7 @@ class Options():
         optim_arg.add_argument("--lr", type=float, default=1e1,
                                 help="learning rate, default is 0.001")
         optim_arg.add_argument("--log-interval", type=int, default=50,
-                                help="number of images after which the training loss is logged, default is 50")    
+                                help="number of images after which the training loss is logged, default is 50")
 
         # evaluation args
         eval_arg = subparsers.add_parser("eval", help="parser for evaluation/stylizing arguments")
@@ -87,10 +87,10 @@ class Options():
                                 help="path to style-folder")
         eval_arg.add_argument("--output-image", type=str, default="output.jpg",
                                 help="path for saving the output image")
-        eval_arg.add_argument("--model", type=str, required=True,
+        eval_arg.add_argument("--model", type=str, default='models/21styles.model',
                                 help="saved model to be used for stylizing the image")
         eval_arg.add_argument("--cuda", type=int, default=1,
-                                help="set it to 1 for running on GPU, 0 for CPU")    
+                                help="set it to 1 for running on GPU, 0 for CPU")
         eval_arg.add_argument("--vgg-model-dir", type=str, default="models/",
                                 help="directory for vgg, if model is not present in the directory it is downloaded")
 
@@ -98,11 +98,16 @@ class Options():
         demo_arg = subparsers.add_parser("demo", help="parser for evaluation/stylizing arguments")
         demo_arg.add_argument("--style-folder", type=str, default="images/9styles/",
                                 help="path to style-folder")
+
+        demo_arg.add_argument("--video", type=str, default="",help='handle video file')
+
+        demo_arg.add_argument("--output", type=str, default="",
+                                help="path for saving the output video name")
         demo_arg.add_argument("--style-size", type=int, default=512,
                                 help="size of style-image, default is the original size of style image")
-        demo_arg.add_argument("--cuda", type=int, default=1, 
+        demo_arg.add_argument("--cuda", type=int, default=1,
                                 help="set it to 1 for running on GPU, 0 for CPU")
-        demo_arg.add_argument("--record", type=int, default=0, 
+        demo_arg.add_argument("--record", type=int, default=0,
                                 help="set it to 1 for recording into video file")
         demo_arg.add_argument("--model", type=str, required=True,
                                 help="saved model to be used for stylizing the image")

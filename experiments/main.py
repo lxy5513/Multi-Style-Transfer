@@ -5,7 +5,7 @@
 ## Copyright (c) 2017
 ##
 ## This source code is licensed under the MIT-style license found in the
-## LICENSE file in the root directory of this source tree 
+## LICENSE file in the root directory of this source tree
 ##+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
@@ -37,7 +37,7 @@ def main():
 
 
     if args.subcommand == "train":
-        # Training the model 
+        # Training the model
         train(args)
 
     elif args.subcommand == 'eval':
@@ -62,7 +62,7 @@ def optimize(args):
     content_image = Variable(utils.preprocess_batch(content_image), requires_grad=False)
     content_image = utils.subtract_imagenet_mean_batch(content_image)
     style_image = utils.tensor_load_rgbimage(args.style_image, size=args.style_size)
-    style_image = style_image.unsqueeze(0)    
+    style_image = style_image.unsqueeze(0)
     style_image = Variable(utils.preprocess_batch(style_image), requires_grad=False)
     style_image = utils.subtract_imagenet_mean_batch(style_image)
 
@@ -100,7 +100,7 @@ def optimize(args):
         total_loss.backward()
         optimizer.step()
         tbar.set_description(total_loss.data.cpu().numpy()[0])
-    # save the image    
+    # save the image
     output = utils.add_imagenet_mean_batch(output)
     utils.tensor_save_bgrimage(output.data[0], args.output_image, args.cuda)
 
@@ -197,7 +197,7 @@ def train(args):
                 )
                 tbar.set_description(mesg)
 
-            
+
             if (batch_id + 1) % (4 * args.log_interval) == 0:
                 # save model
                 style_model.eval()
@@ -235,14 +235,33 @@ def check_paths(args):
 
 
 def evaluate(args):
+    # set output_image
+    dirname = os.path.dirname(args.content_image) 
+    style_ = os.path.basename(args.style_image).split('.')[0]
+    basename = style_ + '_' + os.path.basename(args.content_image)
+    args.output_image = os.path.join(dirname, basename)
+
     content_image = utils.tensor_load_rgbimage(args.content_image, size=args.content_size, keep_asp=True)
     content_image = content_image.unsqueeze(0)
     style = utils.tensor_load_rgbimage(args.style_image, size=args.style_size)
-    style = style.unsqueeze(0)    
+    style = style.unsqueeze(0)
     style = utils.preprocess_batch(style)
 
+
+
+
+    model_dict = torch.load(args.model)
+    model_dict_clone = model_dict.copy() # We can't mutate while iterating
+
+    for key, value in model_dict_clone.items():
+        if key.endswith(('running_mean', 'running_var')):
+            del model_dict[key]
+
     style_model = Net(ngf=args.ngf)
-    style_model.load_state_dict(torch.load(args.model), False)
+    style_model.load_state_dict(model_dict, False)
+
+    #  style_model = Net(ngf=args.ngf)
+    #  style_model.load_state_dict(torch.load(args.model), False)
 
     if args.cuda:
         style_model.cuda()
@@ -266,8 +285,8 @@ def fast_evaluate(args, basedir, contents, idx = 0):
     style_model.eval()
     if args.cuda:
         style_model.cuda()
-    
-    style_loader = StyleLoader(args.style_folder, args.style_size, 
+
+    style_loader = StyleLoader(args.style_folder, args.style_size,
         cuda=args.cuda)
 
     for content_image in contents:

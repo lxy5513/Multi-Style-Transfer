@@ -35,28 +35,53 @@ def run_demo(args, mirror=False):
     width = int(4.0/3*args.demo_size)
     swidth = int(width/4)
     sheight = int(height/4)
+
+
+    #lxy
+    if args.video == '':
+        videofile = '/home/xyliu/Videos/sports/dance.mp4'
+    else:
+        videofile = args.video
+
+    print('handle video\'s path is', videofile)
+    cam = cv2.VideoCapture(videofile)
+
+    video_length = int(cam.get(cv2.CAP_PROP_FRAME_COUNT))
+    ret_val, img = cam.read()
+    i = 1
+
+    ## output name
+    if args.output == '':
+        dirname = os.path.dirname(videofile)
+        basename = os.path.basename(videofile)
+        output_name = os.path.join(dirname, 'tra_'+basename)
+    else:
+        output_name = args.output
+
     if args.record:
-            fourcc = cv2.VideoWriter_fourcc('F','M','P','4')
-            out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (2*width, height))
-    cam = cv2.VideoCapture(0)
+            fshape = img.shape
+            fheight, fwidth = fshape[:2]
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            #  out = cv2.VideoWriter('new_output.mp4', fourcc, 20.0, (2*width, height))
+            out = cv2.VideoWriter(output_name, fourcc, 20.0, (fwidth*2, fheight))
+
     cam.set(3, width)
     cam.set(4, height)
     key = 0
     idx = 0
-    while True:
+    while(cam.isOpened()) and ret_val == True and i < video_length:
             # read frame
             idx += 1
             ret_val, img = cam.read()
+            i += 1
             if mirror:
                     img = cv2.flip(img, 1)
             cimg = img.copy()
             img = np.array(img).transpose(2, 0, 1)
+
             # changing style
-            if idx%10 == 1:
-                    if int(idx/10) == 21:
-                        break
-                    style_v = style_loader.get(int(idx/10))
-                    print('style version ----------------> ', idx)
+            if idx%20 == 1:
+                    style_v = style_loader.get(int(idx/20))
                     style_v = Variable(style_v.data)
                     #  print('style change to ', style_v)
                     style_model.setTarget(style_v)
@@ -83,7 +108,6 @@ def run_demo(args, mirror=False):
             simg = cv2.resize(simg,(swidth, sheight), interpolation = cv2.INTER_CUBIC)
             cimg[0:sheight,0:swidth,:]=simg
             img = np.concatenate((cimg,img),axis=1)
-
             cv2.imshow('MSG Demo', img)
             #cv2.imwrite('stylized/%i.jpg'%idx,img)
             key = cv2.waitKey(1)
@@ -95,6 +119,7 @@ def run_demo(args, mirror=False):
     if args.record:
             out.release()
     cv2.destroyAllWindows()
+    print('video save in ', output_name)
 
 def main():
 	# getting things ready
@@ -106,6 +131,7 @@ def main():
 
 	# run demo
 	run_demo(args, mirror=True)
+
 
 if __name__ == '__main__':
 	main()
